@@ -9,7 +9,7 @@
 // @grant        none
 // ==/UserScript==
 
-(async function() {
+(async function () {
     'use strict';
 
     const requestedFeatures = [
@@ -30,10 +30,10 @@
         const carId = t.getAttribute("data-vehicle-id");
         if (!!carId) {
             const features = (await (await fetchAsync(`https://scs.audi.de/api/v1/vehicles/vehicle/pluc/pl/${carId}?svd=svd-2022-07-19t00_03_33_461-18`))
-                              .vehicle
-                              .detail
-                              .features
-                             );
+                .vehicle
+                .detail
+                .features
+            );
             return features.some((feature) => feature.name === "Power seats in front including memory feature for the driver seat")
         }
         return false;

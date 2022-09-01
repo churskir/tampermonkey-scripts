@@ -2,7 +2,7 @@
 // @name         Audi search result filter
 // @namespace    http://tampermonkey.net/
 // @version      0.1
-// @description  Custom filter Audi used cars search result
+// @description  Custom Audi used cars search result filter
 // @author       Radosław Churski
 // @match        https://www.audi.pl/pl/web/pl/wyszukiwarka-samochodow-uzywanych/wyniki.html
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=audi.pl
@@ -12,8 +12,9 @@
 (async function () {
     'use strict';
 
-    const requestedFeatures = [
-        "Power seats in front including memory feature for the driver seat"
+    const requestedFeatureSets = [
+        ["Power seats in front including memory feature for the driver seat"],
+        ["Alcantara/leather combination", "Fabric \"System\""]
     ];
 
     function sleep(ms) {
@@ -26,6 +27,10 @@
         return data;
     }
 
+    function validateFeature(featureSet, carFeatures) {
+        return carFeatures.some((carFeature) => featureSet.some((featureFromSet) => carFeature === featureFromSet));
+    }
+
     async function suits(t) {
         const carId = t.getAttribute("data-vehicle-id");
         if (!!carId) {
@@ -33,13 +38,13 @@
                 .vehicle
                 .detail
                 .features
-            );
-            return features.some((feature) => feature.name === "Power seats in front including memory feature for the driver seat")
+            ).map(({ name }) => name);
+            return requestedFeatureSets.every((reqFeatureSet) => validateFeature(reqFeatureSet, features));
         }
         return false;
     }
 
-    function filterTiles() {
+    async function filterTiles() {
         const tiles = document.querySelectorAll(".sc-tiles-item")
         tiles.forEach(async (t) => {
             if (await suits(t)) {
